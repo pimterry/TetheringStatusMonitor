@@ -9,6 +9,7 @@ buildscript {
 }
 apply plugin: 'com.android.application'
 apply plugin: 'robolectric'
+apply plugin: 'idea'
 
 repositories {
     jcenter()
@@ -50,8 +51,17 @@ robolectric {
 }
 
 dependencies {
-    androidTestCompile 'junit:junit:4.11'
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'com.jakewharton:butterknife:6.0.0'
+
+    androidTestCompile 'junit:junit:4.11'
     androidTestCompile 'org.robolectric:robolectric:2.4'
+    androidTestCompile 'com.android.support:support-v4:19.0.0'
+    androidTestCompile 'org.assertj:assertj-core:1.7.0'
+}
+
+idea {
+    module {
+        testOutputDir = file('build/test-classes/debug')
+    }
 }
