@@ -8,11 +8,10 @@ import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
-import org.robolectric.shadows.ShadowWifiManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Config(emulateSdk=18, shadows=TetherableShadowWifiManager.class)
+@Config(emulateSdk=18, shadows=TetherableShadowWifiManager.class, manifest="src/main/AndroidManifest.xml")
 @RunWith(RobolectricTestRunner.class)
 public class TetherStatusMonitorTest {
 
@@ -37,11 +36,28 @@ public class TetherStatusMonitorTest {
         assertThat(status.isActive()).as("Tethering status should be 'active' if tethering is enabled").isTrue();
     }
 
+    @Test
+    public void tetherStatusShouldBeFalseIfTheApiFails() {
+        TetherStatusMonitor monitor = new TetherStatusMonitor(appContext);
+
+        makeTetheringCheckFailWith(new IllegalStateException("Wifi is on fire"));
+        TetherStatus status = monitor.getCurrentStatus();
+
+        assertThat(status.isActive()).as("Tethering status should not be 'active' if tethering is broken").isFalse();
+    }
+
     private void enableTethering() {
+        getShadowWifiManager().setWifiApEnabled(true);
+    }
+
+    private void makeTetheringCheckFailWith(RuntimeException e) {
+        getShadowWifiManager().setWifiApException(e);
+    }
+
+    private TetherableShadowWifiManager getShadowWifiManager() {
         WifiManager wifiManager = (WifiManager) appContext.getSystemService(Context.WIFI_SERVICE);
 
-        TetherableShadowWifiManager shadowWifiManager = (TetherableShadowWifiManager) Robolectric.shadowOf(wifiManager);
-        shadowWifiManager.setWifiApEnabled(true);
+        return (TetherableShadowWifiManager) Robolectric.shadowOf(wifiManager);
     }
 
 }

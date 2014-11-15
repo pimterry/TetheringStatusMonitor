@@ -9,13 +9,23 @@ import org.robolectric.shadows.ShadowWifiManager;
 public class TetherableShadowWifiManager extends ShadowWifiManager {
 
     private boolean wifiApEnabled;
+    private RuntimeException wifiApException;
 
     @Implementation
-    public boolean isWifiApEnabled() {
-        return wifiApEnabled;
+    public boolean isWifiApEnabled() throws RuntimeException {
+        if (wifiApException != null) {
+            throw wifiApException;
+        } else {
+            return wifiApEnabled;
+        }
     }
 
     void setWifiApEnabled(boolean wifiApEnabled) {
         this.wifiApEnabled = wifiApEnabled;
+        this.wifiApException = null;
+    }
+
+    void setWifiApException(RuntimeException exception) {
+        this.wifiApException = exception;
     }
 }
